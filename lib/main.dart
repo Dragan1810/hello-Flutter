@@ -1,107 +1,177 @@
 import 'package:flutter/material.dart';
-import 'package:english_words/english_words.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+
+final ThemeData iOSTheme = new ThemeData(
+  primarySwatch: Colors.red,
+  primaryColor: Colors.grey[400],
+  primaryColorBrightness: Brightness.dark,
+);
+
+final ThemeData androidTheme = new ThemeData(
+  primarySwatch: Colors.blue[800],
+  accentColor: Colors.green[100],
+);
+
+const String defaultUserName = "John Doe";
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Startup Name Generator?',
-      theme: new ThemeData(
-        primaryColor: Colors.white,
-      ),
-      home: RandomWords(),
+    return new MaterialApp(
+      title: "Chat Application",
+      theme: defaultTargetPlatform == TargetPlatform.iOS
+        ? iOSTheme : androidTheme,
+      home: new Chat(),
     );
   }
 }
 
-class RandomWords extends StatefulWidget {
+class Chat extends StatefulWidget {
   @override
-  createState() => RandomWordsState();
+  State createState() => new ChatWindow();
 }
 
-class RandomWordsState extends State<RandomWords> {
-  final _suggestions = <WordPair>[];
-  final _saved = Set<WordPair>();
-  final _biggerFont = TextStyle(fontSize: 18.0);
+class ChatWindow extends State<Chat> with TickerProviderStateMixin {
+  final List<Msg> _messages = <Msg>[];
+  final TextEditingController _textController = new TextEditingController();
+  bool _isWritting = false;
 
-  void _pushSaved() {
-    Navigator.of(context).push(
-      new MaterialPageRoute(
-        builder: (context) {
-          final tiles = _saved.map(
-                (pair) {
-              return new ListTile(
-                title: new Text(
-                  pair.asPascalCase,
-                  style: _biggerFont,
-                ),
-              );
-            },
-          );
-          final divided = ListTile
-              .divideTiles(
-            context: context,
-            tiles: tiles,
-          )
-              .toList();
-          return new Scaffold(
-            appBar: new AppBar(
-              title: new Text('Saved Suggestions'),
-            ),
-            body: new ListView(children: divided),
-          );
-        },
-      ),
-    );
-  }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Startup Name Generator 2"),
-        actions: <Widget>[
-          IconButton(icon: new Icon(Icons.list), onPressed: _pushSaved),
-        ],
+    return new Scaffold(
+      appBar: new AppBar(
+        title: new Text("Chat Application"),
+        elevation: Theme.of(context).platform == TargetPlatform.iOS ? 0.0 : 6.0,
       ),
-      body: _buildSuggestions(),
+      body: new Column(children: <Widget>[
+        new Flexible(
+          child: new ListView.builder(
+              itemBuilder: (_, int index) => _messages[index],
+              itemCount: _messages.length,
+              reverse: true,
+              padding: new EdgeInsets.all(6.0),
+          )
+        ),
+        new Divider(height: 1.0,),
+        new Container(
+          child: _buildComposer(),
+          decoration: new BoxDecoration(color: Theme.of(context).cardColor)
+        )
+      ]),
+    );
+  }
+  Widget _buildComposer() {
+    return new IconTheme(
+        data: new IconThemeData(color: Theme.of(context).accentColor),
+        child: new Container(
+          margin: const EdgeInsets.symmetric(horizontal: 9.0),
+          child: new Row(
+            children: <Widget>[
+              new Flexible(child: new TextField(
+                controller: _textController,
+                onChanged: (String txt) {
+                  setState(() {
+                    _isWritting = txt.length > 0;
+                  });
+                },
+                onSubmitted: _submitMsg,
+                decoration: new InputDecoration.collapsed(hintText: "Enter some text to send a message!"),
+              )),
+              new Container(
+                margin: new EdgeInsets.symmetric(horizontal: 3.0),
+                child: Theme.of(context).platform == TargetPlatform.iOS
+                  ? new CupertinoButton(
+                    child: new Text("Submit"),
+                    onPressed: _isWritting ? () => _submitMsg(_textController.text)
+                        : null
+                )
+                    : new IconButton(
+                    icon: new Icon(Icons.message),
+                    onPressed: _isWritting
+                      ? () => _submitMsg(_textController.text)
+                        : null,
+                )
+              )
+            ],
+          ),
+          decoration: Theme.of(context).platform == TargetPlatform.iOS
+          ? new BoxDecoration(
+            border: new Border(
+              top: new BorderSide(color: Colors.brown[200])
+            )
+          ): null
+        )
     );
   }
 
-  Widget _buildRow(WordPair pair) {
-    final alreadySaved = _saved.contains(pair);
-    return ListTile(
-      title: Text(
-        pair.asPascalCase,
-        style: _biggerFont,
+  void _submitMsg(String txt) {
+    _textController.clear();
+    setState(() {
+      _isWritting = false;
+    });
+    Msg msg = new Msg(
+      txt: txt,
+      animationController: new AnimationController(
+          vsync: this,
+          duration: new Duration(microseconds: 800)
       ),
-      trailing: new Icon(
-        alreadySaved ? Icons.favorite : Icons.favorite_border,
-        color: alreadySaved ? Colors.red : null,
-      ),onTap: () {
-      setState(() {
-        if (alreadySaved) {
-          _saved.remove(pair);
-        } else {
-          _saved.add(pair);
-        }
-      });
-    },
     );
+    setState(() {
+      _messages.insert(0, msg);
+    });
+    msg.animationController.forward();
+
+    @override
+    void dispose() {
+      for (Msg msg in _messages) {
+        msg.animationController.dispose();
+      }
+      super.dispose();
+    }
   }
 
-  Widget _buildSuggestions() {
-    return ListView.builder(
-        padding: EdgeInsets.all(16.0),
-        itemBuilder: (context, i) {
-          if (i.isOdd) return Divider();
-          final index = i ~/ 2;
-          if (index >= _suggestions.length) {
-            _suggestions.addAll(generateWordPairs().take(10));
-          }
-          return _buildRow(_suggestions[index]);
-        }
+}
+
+class Msg extends StatelessWidget {
+  Msg({this.txt, this.animationController});
+  final String txt;
+  final AnimationController animationController;
+
+  @override
+  Widget build(BuildContext context) {
+    return new SizeTransition(
+        sizeFactor: new CurvedAnimation(
+            parent: animationController,
+            curve: Curves.bounceOut,
+        ),
+      axisAlignment: 0.0,
+      child: new Container(
+        margin: const EdgeInsets.symmetric(vertical: 8.0),
+        child: new Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            new Container(
+              margin: const EdgeInsets.only(right: 18.0),
+              child: new CircleAvatar(child: new Text(defaultUserName[0])),
+            ),
+            new Expanded(
+                child: new Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    new Text(defaultUserName, style: Theme.of(context).textTheme.subhead),
+                    new Container(
+                      margin: const EdgeInsets.only(top:6.0),
+                      child: new Text(txt),
+                    )
+                  ],
+                )
+            )
+          ],
+        ),
+      ),
     );
   }
 }
