@@ -1,4 +1,133 @@
 import 'package:flutter/material.dart';
+import 'package:hello_flutter/model/model.dart';
+import 'package:rxdart/rxdart.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+const ROOT_URL = "https://api.themoviedb.org/3";
+const API_KEY = "api_key=d77e299445f92f06250fe4596c41fde7";
+
+void main() => runApp(MyApp());
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: "Movie Searcher",
+      theme: ThemeData.dark(),
+      home: HomePage()
+    );
+  }
+}
+
+class HomePage extends StatefulWidget {
+  @override
+  HomeState createState() => HomeState();
+}
+
+class HomeState extends State<HomePage> {
+  List<Movie> movies = List();
+  bool hasLoaded = true;
+
+  final PublishSubject subject = PublishSubject<String>();
+
+  @override
+  void dispose() {
+    subject.close();
+    super.dispose();
+  }
+
+  void searchMovies(query) {
+    resetMovies();
+    if (query.isEmpty) {
+      setState(() {
+        hasLoaded = true;
+      });
+    }
+    setState(() => hasLoaded = false);
+    http.get('$ROOT_URL/search/movie?$API_KEY&query=$query')
+        .then((res) => res.body)
+        .then(json.decode)
+        .then((map) => map["results"])
+        .then((movies) => movies.forEach(addMovie))
+        .then((e) {
+          setState(() {
+            hasLoaded = true;
+          });
+    });
+  }
+
+  void addMovie(item) {
+    setState(() {
+      movies.add(Movie.fromJson(item));
+    });
+    print('${movies.map((m) => m.title)}');
+  }
+
+  void onError(dynamic d) {
+    setState(() {
+      hasLoaded = true;
+    });
+  }
+
+  void resetMovies() {
+    setState(() => movies.clear());
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    subject.stream.debounce(Duration(milliseconds: 400)).listen(searchMovies);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Movie Searcher'),
+      ),
+      body: Container(
+        padding: EdgeInsets.all(10.0),
+        child: Column(
+          children: <Widget>[
+            TextField(
+              onChanged: (String string) => (subject.add(string))
+            ),
+            hasLoaded ? Container(): CircularProgressIndicator(),
+            Expanded(
+              child: ListView.builder(
+                  padding: EdgeInsets.all(10.0),
+                  itemCount: movies.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return new Container();
+    },
+        ),
+            )
+          ],
+      ),
+    ),
+    );
+  }
+}
+
+class MovieView extends StatefulWidget {
+  MovieView(this.movie);
+  final Movie movie;
+
+  @override
+  MovieViewState createState() => MovieViewState();
+}
+
+class MovieViewState extends State<MovieView> {
+  Movie movieState;
+}
+
+
+
+
+
+/*
+import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
@@ -180,3 +309,5 @@ class Msg extends StatelessWidget {
     );
   }
 }
+ */
+
