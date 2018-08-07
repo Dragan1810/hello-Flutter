@@ -27,7 +27,7 @@ class HomePage extends StatefulWidget {
 
 class HomeState extends State<HomePage> {
   List<Movie> movies = List();
-  bool hasLoaded = true;
+  bool hasLoaded = false;
 
   final PublishSubject subject = PublishSubject<String>();
 
@@ -99,7 +99,7 @@ class HomeState extends State<HomePage> {
                   padding: EdgeInsets.all(10.0),
                   itemCount: movies.length,
                   itemBuilder: (BuildContext context, int index) {
-                    return new Container();
+                    return new MovieView(movies[index]);
     },
         ),
             )
@@ -120,6 +120,66 @@ class MovieView extends StatefulWidget {
 
 class MovieViewState extends State<MovieView> {
   Movie movieState;
+
+  @override
+  void initState() {
+    super.initState();
+    movieState = widget.movie;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Container(
+        height: 200.0,
+        padding: EdgeInsets.all(10.0),
+        child: Row(
+          children: <Widget>[
+            movieState.posterPath != null ?
+                Hero(
+                  child: Image.network("https://image.tmdb.org/t/p/w92${movieState.posterPath}"),
+                  tag: movieState.id,
+                ) : Container(),
+            Expanded(
+              child: Stack(
+                children: <Widget>[
+                  Align(
+                    alignment: Alignment.center,
+                child: Padding(
+                    padding: EdgeInsets.all(10.0),
+                    child: Text(
+                      movieState.title,
+                      maxLines: 10,
+        ),
+    ),
+    ),
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: IconButton(
+                      icon: movieState.favored
+                        ? Icon(Icons.star)
+                        : Icon(Icons.star_border),
+                        color: Colors.white,
+                        onPressed: () {},
+                    ),
+                  ),
+                  
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: IconButton(
+                        icon: Icon(Icons.arrow_downward),
+                        color: Colors.white,
+                        onPressed: () {}
+                    ),
+    ),
+    ],
+    ),
+            ),
+    ],
+    ),
+    ),
+    );
+  }
 }
 
 
