@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hello_flutter/model/model.dart';
+import 'package:hello_flutter/screens/HomeScreen.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -13,19 +14,19 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "Movie Searcher",
-      theme: ThemeData.dark(),
-      home: HomePage()
+      title: "Sirmium-Turist",
+      theme: ThemeData.light(),
+      home: HomeScreen()
     );
   }
 }
 
-class HomePage extends StatefulWidget {
+class ListPage extends StatefulWidget {
   @override
-  HomeState createState() => HomeState();
+  ListState createState() => ListState();
 }
 
-class HomeState extends State<HomePage> {
+class ListState extends State<ListPage> {
   List<Movie> movies = List();
   bool hasLoaded = false;
 
