@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:hello_flutter/screens/Single.dart';
 
 class HomeScreen extends StatelessWidget {
 
@@ -16,9 +16,12 @@ class HomeScreen extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                GestureDetector (
+                InkWell (
                   onTap: () {
-                    print("onTap called.");
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => SingleView()),
+                    );
                   },
                   child: Container(
                   decoration: new BoxDecoration(
