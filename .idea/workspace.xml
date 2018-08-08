@@ -6,7 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="7290b0ec-ae12-4e84-868f-52b49686c4f6" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/lib/screens/HomeScreen.dart" afterPath="$PROJECT_DIR$/lib/screens/HomeScreen.dart" />
     </list>
     <ignored path="$PROJECT_DIR$/.dart_tool/" />
     <ignored path="$PROJECT_DIR$/.idea/" />
@@ -321,7 +320,14 @@
       <option name="project" value="LOCAL" />
       <updated>1533655982157</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="home screen init">
+      <created>1533726036188</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1533726036188</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -373,7 +379,8 @@
     <MESSAGE value="Movie app2" />
     <MESSAGE value="part 1" />
     <MESSAGE value="init" />
-    <option name="LAST_COMMIT_MESSAGE" value="init" />
+    <MESSAGE value="home screen init" />
+    <option name="LAST_COMMIT_MESSAGE" value="home screen init" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
